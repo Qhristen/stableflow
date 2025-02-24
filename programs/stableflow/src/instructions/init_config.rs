@@ -1,5 +1,4 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::Token;
 
 use crate::ConfigState;
 
@@ -12,22 +11,22 @@ pub struct Config<'info>  {
     #[account(
         init, 
         payer = admin,
-        seeds = [b"intitialize_config".as_ref()],
+        seeds = [b"config"],
         space = 8 + ConfigState::INIT_SPACE,
         bump,
     )]
     pub config : Account<'info, ConfigState>,
-
     pub system_program: Program<'info, System>,
-    pub token_program: Program<'info, Token>,
 }
 
 impl<'info> Config<'info> {
-    pub fn initialize_config(&mut self, fee: u8, bumps: &ConfigBumps) -> Result<()> {
+    pub fn initialize_config(&mut self, fee: u16, bumps: &ConfigBumps) -> Result<()> {
         self.config.set_inner(ConfigState{
             admin: self.admin.key(),
+            fee,
+            total_deposits: 0,
+            total_yield: 0,
             bump: bumps.config,
-           treasury_fee: fee,
         });
         Ok(())
     }

@@ -4,6 +4,9 @@ use anchor_lang::prelude::*;
 #[derive(InitSpace)]
 pub struct ConfigState {
     pub admin: Pubkey,
-    pub treasury_fee: u8,
+    pub total_deposits: u64,
+    pub total_yield: u64,
+    pub fee: u16, // Swap fee in basis points
     pub bump: u8,
+
 }

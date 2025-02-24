@@ -1,12 +1,15 @@
 use std::u64;
 
 use anchor_lang::prelude::*;
-use anchor_spl::{associated_token::AssociatedToken, token:: Token};
-use raydium_amm_cpi::{create_pool_fee_address, initialize, openbook_program_id, program::RaydiumAmm, Initialize2};
+use anchor_spl::{associated_token::AssociatedToken, token::Token};
+use raydium_amm_cpi::{
+    create_pool_fee_address, initialize, openbook_program_id, Initialize2,
+};
 
 #[derive(Accounts)]
-pub struct Initialize<'info>  {
-    pub amm_program: Program<'info, RaydiumAmm>,
+pub struct RaydiumAmmInitialize<'info> {
+    /// CHECK: Safe
+    pub amm_program: UncheckedAccount<'info>,
 
     /// CHECK: Safe. The new amm Account to be create, a PDA create with seed = [program_id, openbook_market_id, b"amm_associated_seed"]
     #[account(
@@ -149,10 +152,9 @@ pub struct Initialize<'info>  {
     pub sysvar_rent: Sysvar<'info, Rent>,
 }
 
-impl<'info> Initialize<'info> {
-    pub fn initialize(&mut self, init_pc_amount: u64, init_coin_amount: u64 ) -> Result<()> {
-
-        let cpi_accounts = Initialize2{
+impl<'info> RaydiumAmmInitialize<'info> {
+    pub fn initialize(&mut self,nonce: u8, open_time: u64, init_pc_amount: u64, init_coin_amount: u64) -> Result<()> {
+        let cpi_accounts = Initialize2 {
             amm: self.amm.clone(),
             amm_authority: self.amm_authority.clone(),
             amm_coin_mint: self.amm_coin_mint.clone(),
@@ -174,15 +176,11 @@ impl<'info> Initialize<'info> {
             system_program: self.system_program.clone(),
             token_program: self.token_program.clone(),
             sysvar_rent: self.sysvar_rent.clone(),
-            
         };
 
         let ctx = CpiContext::new(self.amm_program.to_account_info(), cpi_accounts);
-        initialize(ctx, 2, 2, init_pc_amount, init_coin_amount)?;
-
+        initialize(ctx, nonce, open_time, init_pc_amount, init_coin_amount)?;
 
         Ok(())
-
-    
     }
 }
