@@ -1,46 +1,36 @@
-use crate::{ExternalProtocolState, VaultState};
+use crate::ExternalProtocolState;
 use anchor_lang::prelude::*;
-use anchor_spl::token_interface::{Mint, TokenAccount};
 
 #[derive(Accounts)]
-#[instruction(protocol_id: String)]
+#[instruction(pool_id: Pubkey, name: String)]
 pub struct AddExternalProtocol<'info> {
     #[account(mut)]
     pub user: Signer<'info>,
 
-    #[account(init, payer = user, space = 8 + ExternalProtocolState::INIT_SPACE)]
-    pub protocol: Account<'info, ExternalProtocolState>,
-
     #[account(
-        mut,
-        associated_token::mint = token_mint,
-        associated_token::authority = vault_state,
-    )]
-    pub vault: InterfaceAccount<'info, TokenAccount>,
-
-    pub token_mint: InterfaceAccount<'info, Mint>,
-
-    #[account(
-        mut,
-        close = user,
-        has_one = token_mint,
-        seeds = [b"vault_state", user.key().as_ref(), vault_state.seed.as_bytes()],
+        init, 
+        payer = user, 
+        seeds = [b"external_protocol", pool_id.to_bytes().as_ref(), name.as_bytes()],
+        space = 8 + ExternalProtocolState::INIT_SPACE,
         bump
     )]
-    pub vault_state: Account<'info, VaultState>,
-
-    /// CHECK: This is safe as we just store the pubkey
-    pub protocol_id: AccountInfo<'info>,
+    pub protocol: Account<'info, ExternalProtocolState>,
 
     pub system_program: Program<'info, System>,
 }
 
 impl<'info> AddExternalProtocol<'info> {
-    pub fn add(&mut self, protocol_id: String) -> Result<()> {
+    pub fn add(
+        &mut self,
+        pool_id: Pubkey,
+        name: String,
+        bumps: &AddExternalProtocolBumps,
+    ) -> Result<()> {
         self.protocol.set_inner(ExternalProtocolState {
+            pool_id,
             allocated_funds: 0,
-            protocol_id,
-            vault: self.vault.key(),
+            name,
+            bump: bumps.protocol,
         });
         Ok(())
     }

@@ -4,7 +4,8 @@ use anchor_lang::prelude::*;
 #[derive(InitSpace)]
 pub struct ExternalProtocolState {
     pub allocated_funds: u64,        // Funds allocated to this protocol
-    pub vault: Pubkey,
+    pub pool_id: Pubkey,         // External protocol's public key
     #[max_len(32)]
-    pub protocol_id: String,         // External protocol's public key
+    pub name: String,         // External protocol's public key
+    pub bump: u8,    
 }

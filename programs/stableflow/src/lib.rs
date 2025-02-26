@@ -45,8 +45,38 @@ pub mod stableflow {
         Ok(())
     }
 
-    pub fn add_external_protocol(ctx: Context<AddExternalProtocol>, protocol_id: String) -> Result<()> {
-        ctx.accounts.add(protocol_id)?;
+    pub fn add_external_protocol(
+        ctx: Context<AddExternalProtocol>,
+        pool_id: Pubkey,
+        name: String,
+    ) -> Result<()> {
+        ctx.accounts.add(pool_id, name, &ctx.bumps)?;
         Ok(())
+    }
+
+    pub fn create_cpmm_pool(
+        ctx: Context<CreateCpmmPool>,
+        funding_amount: Option<u64>,
+    ) -> Result<()> {
+        ctx.accounts.issue_tokens()?;
+        ctx.accounts.revoke_mint_authority()?;
+        ctx.accounts.create_cpmm_pool(funding_amount)
+    }
+
+    pub fn lock_cpmm_liquidity(ctx: Context<LockCpmmLiquidity>) -> Result<()> {
+        ctx.accounts.lock_cpmm_cpi()
+    }
+
+    pub fn cpmm_deposit(
+        ctx: Context<CpmmDeposit>,
+        lp_token_amount: u64,
+        maximum_token_0_amount: u64,
+        maximum_token_1_amount: u64,
+    ) -> Result<()> {
+        ctx.accounts.proxy_deposit(
+            lp_token_amount,
+            maximum_token_0_amount,
+            maximum_token_1_amount,
+        )
     }
 }

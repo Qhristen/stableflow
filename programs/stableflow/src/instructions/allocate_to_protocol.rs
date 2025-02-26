@@ -14,7 +14,11 @@ pub struct AllocateToExternalProtocol<'info> {
     #[account(mut)]
     pub user: Signer<'info>,
 
-    #[account(mut)]
+    #[account(
+        mut,
+        seeds = [b"external_protocol", protocol.pool_id.to_bytes().as_ref(), protocol.name.as_bytes()],
+        bump
+    )]
     pub protocol: Account<'info, ExternalProtocolState>,
 
     #[account(mut)]

@@ -35,7 +35,6 @@ describe("stableflow", async () => {
   // Generate a new keypair for the user
   const user = Keypair.generate();
   // Generate a new keypair for the user
-  // const user = Keypair.generate();
 
   // Test accounts
   let vaultStatePda: PublicKey;
@@ -45,7 +44,42 @@ describe("stableflow", async () => {
   let userATA: Account;
   let vault: PublicKey;
 
-  const seed = "hello";
+  // This variable is the base vault account.
+  let creator_base_ata: PublicKey;
+  
+  // This variable is the token vault account.
+  let creator_token_ata: PublicKey;
+  
+  // Raydium Observation State PDA
+  let observation_state: PublicKey;
+  
+  // Raydium Pool PDA
+  let pool_state: PublicKey;
+  
+  // Raydium Pool vault and lp mint authority PDA
+  let authority: PublicKey;
+  
+  // Raydium base mint vault & token mint vault
+  let token_vault_0: PublicKey;
+  let token_vault_1: PublicKey;
+  
+  // Raydium lp_mint
+  let lp_mint: PublicKey;
+  
+  // lp mint ata
+  let lp_mint_ata: PublicKey;
+  
+  // locked pda 
+  let locked_liquidity: PublicKey;
+  
+  // locked pda 
+  let locked_lp_vault: PublicKey;
+
+
+// Address of the Rent program
+const RENT_PROGRAM = anchor.web3.SYSVAR_RENT_PUBKEY;
+
+  const seed = "seed";
   // Test constants
   const FEE = 30; // 0.3%
   const INITIAL_MINT_AMOUNT = 1_000_000_000;
@@ -95,7 +129,8 @@ describe("stableflow", async () => {
       INITIAL_MINT_AMOUNT
     );
 
-    // vault = getAssociatedTokenAddressSync(mint, vaultStatePda, true, tokenProgram);
+   
+  
   });
 
   it("Initializes config", async () => {
@@ -158,9 +193,6 @@ describe("stableflow", async () => {
 
   it("Deposit", async () => {
     const amount = new BN(100_000_000);
-    const balanceBefore = await getTokenBalance(userATA.address);
-    console.log("Balance before deposit:", balanceBefore);
-
     try {
       await program.methods
         .deposit(amount)
@@ -179,8 +211,6 @@ describe("stableflow", async () => {
         .then(confirm)
         .then(log);
 
-      const balanceAfter = await getTokenBalance(userATA.address);
-      console.log("Balance after deposit:", balanceAfter);
     } catch (error) {
       console.log("deposit error", error);
     }
@@ -208,8 +238,52 @@ describe("stableflow", async () => {
       .rpc()
       .then(confirm)
       .then(log);
-
   });
+  
+  it("Add external protocol", async () => {
+    const pool_id = user.publicKey;
+    const name = "Raydium";
+    // const balanceBefore = await getTokenBalance(userATA.address);
+    // console.log("Balance before withdrawal:", balanceBefore);
+
+    await program.methods
+      .addExternalProtocol(pool_id, name)
+      .accounts({
+        user: user.publicKey,
+      })
+      .signers([user])
+      .rpc()
+      .then(confirm)
+      .then(log);
+  });
+
+  // it("Cpmm deposit", async () => {
+  //   const funding_amount=new BN(5*LAMPORTS_PER_SOL)
+
+  //   await program.methods
+  //     .cpmmDeposit(funding_amount, funding_amount, funding_amount)
+  //     .accountsPartial({
+  //       cpSwapProgram: CPMM_PROGRAM_ID,
+  //       authority: authority,
+  //       poolState: pool_state,
+  //       lpMint: lp_mint,
+  //       token0Vault: token_vault_0,
+  //       token1Vault: token_vault_1,
+  //       owner: user.publicKey,
+  //       ownerLpToken: lp_mint_ata,
+  //       token0Account: null,
+  //       token1Account: null,
+  //       vault0Mint: token_vault_0,
+  //       vault1Mint: token_vault_1,
+  //       tokenProgram2022: TOKEN_2022_PROGRAM_ID,
+  //       tokenProgram,
+       
+  //     })
+  //     .signers([user])
+  //     .rpc()
+  //     .then(confirm)
+  //     .then(log);
+  // });
 
   const airdrop = async (address: PublicKey, amount: number) => {
     let txn = await provider.connection.requestAirdrop(
