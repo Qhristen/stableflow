@@ -1,5 +1,4 @@
 use anchor_lang::prelude::*;
-use constant_product_curve::CurveError;
 
 #[error_code]
 pub enum CustomError {
@@ -42,18 +41,4 @@ pub enum CustomError {
     #[msg("No rewards available to claim")]
     NoRewards,
     
-}
-
-impl From<CurveError> for CustomError {
-    fn from(error: CurveError) -> CustomError {
-        match error {
-            CurveError::InvalidPrecision => CustomError::InvalidPrecision,
-            CurveError::Overflow => CustomError::Overflow,
-            CurveError::Underflow => CustomError::Underflow,
-            CurveError::InvalidFeeAmount => CustomError::InvalidFee,
-            CurveError::InsufficientBalance => CustomError::InsufficientBalance,
-            CurveError::ZeroBalance => CustomError::ZeroBalance,
-            CurveError::SlippageLimitExceeded => CustomError::SlippageExceeded,
-        }
-    }
 }

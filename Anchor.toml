@@ -5,7 +5,11 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-stableflow = "DUbyG5Yoyrd26hV28BUH5A5Wmr76jzQsmxuaMmv1fdJn"
+stableflow = "FvwXgB97QyQHF6PE9EyVBcPtuHxJrLhKpYnu1dorRe3x"
+
+[programs.devnet]
+stableflow = "FvwXgB97QyQHF6PE9EyVBcPtuHxJrLhKpYnu1dorRe3x"
+
 
 [registry]
 url = "https://api.apr.dev"
